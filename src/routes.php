@@ -226,18 +226,20 @@ $app->delete("/order_product/{id}", function (Request $request, Response $respon
 
 $app->post("/order_product/", function (Request $request, Response $response){
     $new_order = $request->getParsedBody();
-    $sql = "INSERT INTO order_product (ID_ORDER, ID_KURIR, ID, TGL_ORDER, END_ORDER, STATUS, LONGITUDE, LATITUDE) VALUE (:id_order, :id_kurir, :id, :tgl_order, :end_order, :status, :longitude, :latitude )";
+    $sql = "INSERT INTO order_product (ID_KURIR, ID, ID_PRODUCT, TGL_ORDER, WAKTU_ORDER, TEMPAT_ORDER, TGL_PENGAMBILAN, WAKTU_PENGAMBILAN, TEMPAT_PENGAMBILAN, STATUS, HARGA_TOTAL) VALUE (:id_kurir, :id, :tgl_order, :waktu_order, :tempat_order, :tgl_pengambilan, :waktu_pengambilan, :tempat_pengambilan, :status, :harga_total )";
     $stmt = $this->db->prepare($sql);
-
     $data = [
-        ":id_order" => $new_order["id_order"],
         ":id_kurir" => $new_order["id_kurir"],
         ":id" => $new_order["id"],
+        ":id_product" => $new_order["id_product"],
         ":tgl_order" => $new_order["tgl_order"],
-        ":end_order" => $new_order["end_order"],
+        ":waktu_order" => $new_order["waktu_order"],
+        ":tempat_order" => $new_order["tempat_order"],
+        ":tgl_pengambilan" => $new_order["tgl_pengambilan"],
+        ":waktu_pengambilan" => $new_order["waktu_pengambilan"],
+        ":tempat_pengambilan" => $new_order["tempat_pengambilan"],
         ":status" => $new_order["status"],
-        ":longitude" => $new_order["longitude"],
-        ":latitude" => $new_order["latitude"]
+        ":harga_total" => $new_order["harga_total"]
     ];
 
     if($stmt->execute($data))
@@ -245,6 +247,32 @@ $app->post("/order_product/", function (Request $request, Response $response){
     
     return $response->withJson(["status" => "failed", "data" => "0"], 200);
 });
+
+$app->post("/extras/", function (Request $request, Response $response){
+    $new_order = $request->getParsedBody();
+    $sql = "INSERT INTO order_product (ID_ORDER, NAMA, HARGA, RINCIAN) VALUE (:id_order, :nama, :harga, :rincian)";
+    $stmt = $this->db->prepare($sql);
+    $data = [
+        ":id_order" => $new_order["id_order"],
+        ":nama" => $new_order["nama"],
+        ":harga" => $new_order["harga"],
+        ":rincian" => $new_order["rincian"]
+    ];
+    if($stmt->execute($data))
+       return $response->withJson(["status" => "success", "data" => "1"], 200);
+    
+    return $response->withJson(["status" => "failed", "data" => "0"], 200);
+});
+
+$app->get("/extras/", function (Request $request, Response $response){
+    $sql = "SELECT * FROM extras";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute();
+    $result = $stmt->fetchAll();
+    return $response->withJson(["status" => "success", "data" => $result], 200);
+});
+
+
 
 $app->put("/order_product/{id_order}", function (Request $request, Response $response, $args){
     $id_order = $args["id_order"]; 
@@ -268,8 +296,60 @@ $app->put("/order_product/{id_order}", function (Request $request, Response $res
     return $response->withJson(["status" => "failed", "data" => "0"], 200);
 });
 
-$app->put('/updateOrder/', function(Request $result, Response $response){
-    $new_order = $request->getParsedBody();
+$app->put('/notResponsed/{id}', function(Request $result, Response $response, $args){
+    $id = $args['id'];
+    $sql = "UPDATE order_product set status=:status where id_order=:id";
+    $stmt = $this->db->prepare($sql);
+    $data = [
+        ":id" => $id,
+        ":status" => "0"
+    ];
+    $stmt->execute($data);
+    $result = $stmt->fetchAll();
+    return $response->withJson(["status" => "success", "data" => "data has been updated"], 200);
+});
+
+$app->put('/Progressed/{id}', function(Request $result, Response $response, $args){
+    $id = $args['id'];
+    $sql = "UPDATE order_product set status=:status where id_order=:id";
+    $stmt = $this->db->prepare($sql);
+    $data = [
+        ":id" => $id,
+        ":status" => "1"
+    ];
+    $stmt->execute($data);
+    $result = $stmt->fetchAll();
+    return $response->withJson(["status" => "success", "data" => "data has been updated"], 200);
+});
+
+$app->put('/Done/{id}', function(Request $result, Response $response, $args){
+    $id = $args['id'];
+    $sql = "UPDATE order_product set status=:status where id_order=:id";
+    $stmt = $this->db->prepare($sql);
+    $data = [
+        ":id" => $id,
+        ":status" => "2"
+    ];
+    $stmt->execute($data);
+    $result = $stmt->fetchAll();
+    return $response->withJson(["status" => "success", "data" => "data has been updated"], 200);
+});
+
+$app->put('/Rejected/{id}', function(Request $result, Response $response, $args){
+    $id = $args['id'];
+    $sql = "UPDATE order_product set status=:status where id_order=:id";
+    $stmt = $this->db->prepare($sql);
+    $data = [
+        ":id" => $id,
+        ":status" => "2"
+    ];
+    $stmt->execute($data);
+    $result = $stmt->fetchAll();
+    return $response->withJson(["status" => "success", "data" => "data has been updated"], 200);
+});
+
+
+$app->put('//', function(Request $result, Response $response){
     $sql = "UPDATE order_product set status=:status where id=:id";
     $stmt = $this->db->prepare($sql);
     $data = [
@@ -280,7 +360,6 @@ $app->put('/updateOrder/', function(Request $result, Response $response){
     $result = $stmt->fetchAll();
     return $response->withJson(["status" => "success", "data" => $result], 200);
 });
-
 //user
 
 $app->post('/login/', function(Request $request, Response $response){
