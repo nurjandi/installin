@@ -341,7 +341,7 @@ $app->put('/Rejected/{id}', function(Request $result, Response $response, $args)
     $stmt = $this->db->prepare($sql);
     $data = [
         ":id" => $id,
-        ":status" => "2"
+        ":status" => "3"
     ];
     $stmt->execute($data);
     $result = $stmt->fetchAll();
@@ -349,12 +349,12 @@ $app->put('/Rejected/{id}', function(Request $result, Response $response, $args)
 });
 
 
-$app->put('//', function(Request $result, Response $response){
-    $sql = "UPDATE order_product set status=:status where id=:id";
+$app->get('/getbyStatus/{status}', function(Request $result, Response $response, $args){
+    $id = $args['id'];
+    $sql = "SELECT * from order_product where status=:status";
     $stmt = $this->db->prepare($sql);
     $data = [
-        ":id_order" => $new_order['id_order'],
-        ":status" => $new_order["status"],
+        ":status" => $status
     ];
     $stmt->execute($data);
     $result = $stmt->fetchAll();
