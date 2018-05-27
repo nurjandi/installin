@@ -36,13 +36,14 @@ $app->post("/products/", function (Request $request, Response $response){
 
     $new_product = $request->getParsedBody();
 
-    $sql = "INSERT INTO product (ID_PRODUCT, NAMA, HARGA) VALUE (:id_product, :nama, :harga)";
+    $sql = "INSERT INTO product (ID_PRODUCT, NAMA, HARGA, ATRIBUT) VALUE (:id_product, :nama, :harga, :atribut)";
     $stmt = $this->db->prepare($sql);
 
     $data = [
         ":id_product" => $new_product["id_product"],
         ":nama" => $new_product["nama"],
-        ":harga" => $new_product["harga"]
+        ":harga" => $new_product["harga"],
+        ":atribut" => $new_product["atribut"]
     ];
 
     if($stmt->execute($data))
@@ -54,13 +55,14 @@ $app->post("/products/", function (Request $request, Response $response){
 $app->put("/products/{id}", function (Request $request, Response $response, $args){
     $id = $args["id"];
     $new_product = $request->getParsedBody();
-    $sql = "UPDATE product SET NAMA=:nama, HARGA=:harga WHERE ID_PRODUCT=:id";
+    $sql = "UPDATE product SET NAMA=:nama, HARGA=:harga, atribut=:atribut WHERE ID_PRODUCT=:id";
     $stmt = $this->db->prepare($sql);
     
     $data = [
         ":id" => $id,
         ":nama" => $new_product["nama"],
-        ":harga" => $new_product["harga"]
+        ":harga" => $new_product["harga"],
+        ":atribut" => $new_product["atribut"]
     ];
 
     if($stmt->execute($data))
