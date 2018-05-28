@@ -1,4 +1,4 @@
-<?php
+\<?php
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -25,7 +25,7 @@ $app->get("/products/", function (Request $request, Response $response){
 
 $app->get("/products/{id}", function (Request $request, Response $response, $args){
     $id = $args["id"];
-    $sql = "SELECT * FROM products WHERE ID_PRODUCT=:id";
+    $sql = "SELECT * FROM product WHERE ID_PRODUCT=:id";
     $stmt = $this->db->prepare($sql);
     $stmt->execute([":id" => $id]);
     $result = $stmt->fetch();
@@ -202,14 +202,23 @@ $app->get("/order_product/", function (Request $request, Response $response){
     return $response->withJson(["status" => "success", "data" => $result], 200);
 });
 
-$app->get("/order_product/{id}", function (Request $request, Response $response, $args){
-    $id = $args["id"];
-    $sql = "SELECT * FROM order_product WHERE ID_ORDER=:id";
+$app->get("/order_product/{id_user}", function (Request $request, Response $response, $args){
+    $id = $args["id_user"];
+    $sql = "SELECT * FROM order_product WHERE ID=5";
     $stmt = $this->db->prepare($sql);
-    $stmt->execute([":id" => $id]);
-    $result = $stmt->fetch();
+    $stmt->execute([":id_user" => $id]);
+    $result = $stmt->fetchAll();
     return $response->withJson(["status" => "success", "data" => $result], 200);
 });
+
+// $app->get("/order_product/{id}", function (Request $request, Response $response, $args){
+//     $id = $args["id"];
+//     $sql = "SELECT * FROM order_product WHERE ID_ORDER=:id";
+//     $stmt = $this->db->prepare($sql);
+//     $stmt->execute([":id" => $id]);
+//     $result = $stmt->fetch();
+//     return $response->withJson(["status" => "success", "data" => $result], 200);
+// });
 
 $app->delete("/order_product/{id}", function (Request $request, Response $response, $args){
     $id = $args["id"];
@@ -228,15 +237,13 @@ $app->delete("/order_product/{id}", function (Request $request, Response $respon
 
 $app->post("/order_product/", function (Request $request, Response $response){
     $new_order = $request->getParsedBody();
-    $sql = "INSERT INTO order_product (ID_KURIR, ID, ID_PRODUCT, TGL_ORDER, WAKTU_ORDER, TEMPAT_ORDER, TGL_PENGAMBILAN, WAKTU_PENGAMBILAN, TEMPAT_PENGAMBILAN, STATUS, HARGA_TOTAL) VALUE (:id_kurir, :id, :tgl_order, :waktu_order, :tempat_order, :tgl_pengambilan, :waktu_pengambilan, :tempat_pengambilan, :status, :harga_total )";
+    $sql = "INSERT INTO order_product (ID_ORDER, ID_KURIR, ID, id_product, TGL_ORDER, TGL_PENGAMBILAN, WAKTU_PENGAMBILAN, TEMPAT_PENGAMBILAN, STATUS, HARGA_TOTAL) VALUE (:id_order, :id_kurir, :id, :id_product, NOW(), :tgl_pengambilan, :waktu_pengambilan, :tempat_pengambilan, :status, :harga_total )";
     $stmt = $this->db->prepare($sql);
     $data = [
+        ":id_order" => $new_order["id_order"],
         ":id_kurir" => $new_order["id_kurir"],
         ":id" => $new_order["id"],
         ":id_product" => $new_order["id_product"],
-        ":tgl_order" => $new_order["tgl_order"],
-        ":waktu_order" => $new_order["waktu_order"],
-        ":tempat_order" => $new_order["tempat_order"],
         ":tgl_pengambilan" => $new_order["tgl_pengambilan"],
         ":waktu_pengambilan" => $new_order["waktu_pengambilan"],
         ":tempat_pengambilan" => $new_order["tempat_pengambilan"],
@@ -266,15 +273,14 @@ $app->post("/extras/", function (Request $request, Response $response){
     return $response->withJson(["status" => "failed", "data" => "0"], 200);
 });
 
-$app->get("/extras/", function (Request $request, Response $response){
-    $sql = "SELECT * FROM extras";
+$app->get("/extras/{id_product}", function (Request $request, Response $response, $args){
+    $id_product = $args["id_product"];
+    $sql = "SELECT * FROM extras WHERE id_product=:id_product";
     $stmt = $this->db->prepare($sql);
-    $stmt->execute();
+    $stmt->execute([":id_product" => $id_product]);
     $result = $stmt->fetchAll();
     return $response->withJson(["status" => "success", "data" => $result], 200);
 });
-
-
 
 $app->put("/order_product/{id_order}", function (Request $request, Response $response, $args){
     $id_order = $args["id_order"]; 
@@ -373,8 +379,8 @@ $app->post('/login/', function(Request $request, Response $response){
         ":password" => $new_order["password"],
     ];
     $stmt->execute($data);
-    $count = count($stmt);
-    if($count>0){
+    $result = $stmt->fetchAll();
+    if($result){
         return $response->withJson(["status" => "login success", "data" => "1"], 200);
     }
     else{
@@ -420,11 +426,11 @@ $app->put("/user/{id}", function (Request $request, Response $response, $args){
     return $response->withJson(["status" => "success", "data" => "data updated"], 200);
 });
 
-$app->get("/user/{id}", function (Request $request, Response $response, $args){
-    $id = $args["id"];
-    $sql = "SELECT * FROM user WHERE ID=:id";
+$app->get("/user/{email}", function (Request $request, Response $response, $args){
+    $id = $args["email"];
+    $sql = "SELECT * FROM user WHERE EMAIL=:email";
     $stmt = $this->db->prepare($sql);
-    $stmt->execute([":id" => $id]);
+    $stmt->execute([":email" => $id]);
     $result = $stmt->fetch();
     return $response->withJson(["status" => "success", "data" => $result], 200);
 });
@@ -433,6 +439,6 @@ $app->get("/user/", function (Request $request, Response $response){
     $sql = "SELECT * FROM user";
     $stmt = $this->db->prepare($sql);
     $stmt->execute([":id" => $id]);
-    $result = $stmt->fetch();
+    $result = $stmt->fetchAll();
     return $response->withJson(["status" => "success", "data" => $result], 200);
 });
